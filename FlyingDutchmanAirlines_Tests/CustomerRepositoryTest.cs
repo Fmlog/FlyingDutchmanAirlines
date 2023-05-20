@@ -1,5 +1,7 @@
 using FlyingDutchmanAirlines.Data;
+using FlyingDutchmanAirlines.Models;
 using FlyingDutchmanAirlines.RepositoryLayer;
+using FlyingDutchmanAirlines.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace FlyingDutchmanAirlines_Tests;
@@ -11,13 +13,18 @@ public class CustomerRepositoryTest
     private CustomerRepository _repository;
 
     [TestInitialize]
-    public void TestInitialize()
+    public async Task TestInitialize()
     {
         DbContextOptions<FlyingDutchmanAirlinesContext> dbContextOptions = 
             new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>()
             .UseInMemoryDatabase("FlyingDutchman").Options;
 
         _context = new FlyingDutchmanAirlinesContext(dbContextOptions);
+
+        Customer test = new Customer("Bolin");
+        _context.Customers.Add(test);
+        await _context.SaveChangesAsync();
+
         _repository = new CustomerRepository(_context);
         Assert.IsNotNull(_repository);
     }
@@ -53,10 +60,29 @@ public class CustomerRepositoryTest
     [DataRow('*')]
     public async Task CreateCustomer_FailOnInvalidChar(char invalidChar)
     {
-        CustomerRepository repository = new CustomerRepository(_context);
-        bool result = await repository.CreateCustomer("Hello" + invalidChar);
+        bool result = await _repository.CreateCustomer("Hello" + invalidChar);
         Assert.IsFalse(result);
     }
-    
-    public async Task C
+
+    [TestMethod]
+    public async Task GetCustomerByName_Success()
+    {
+        Customer result = await _repository.GetCustomerByName("Bolin");
+        Assert.IsNotNull(result);
+        Customer dbresult = await _context.Customers.FirstAsync();
+        Assert.AreEqual(dbresult, result);
+    }
+
+
+    [TestMethod]
+    [DataRow("$")]
+    [DataRow("#")]
+    [DataRow("%")]
+    [DataRow("&")]
+    [DataRow("*")]
+    [ExpectedException(typeof(CustomerNotFoundException))]
+    public async Task GetCustomerByName_FailInvalidInput(string invalidInput)
+    {
+            Customer result = await _repository.GetCustomerByName(invalidInput);
+    }
 }
