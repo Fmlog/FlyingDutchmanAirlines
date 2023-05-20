@@ -1,5 +1,7 @@
 ﻿using FlyingDutchmanAirlines.Data;
+using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace FlyingDutchmanAirlines.RepositoryLayer
 {
@@ -12,7 +14,7 @@ namespace FlyingDutchmanAirlines.RepositoryLayer
         }
         public async Task<bool> CreateCustomer(string name)
         {
-            if (string.IsNullOrEmpty(name) || ContainsForbiddenChars(name))
+            if (IsInvalidCustomerName(name))
             {
                 return false;
             }
@@ -29,13 +31,22 @@ namespace FlyingDutchmanAirlines.RepositoryLayer
             {
                 return false;
             }
-
+             
             return true;
         }
-        private bool ContainsForbiddenChars(string name)
+        public async Task<Customer> GetCustomerByName(string name)
+        {
+            if (IsInvalidCustomerName(name))
+            {
+                throw new CustomerNotFoundException();
+            }
+            ;
+            return await _context.Customers.FirstOrDefaultAsync(c => c.Name == name) ?? throw new CustomerNotFoundException();
+        }
+        private bool IsInvalidCustomerName(string name)
         {
             char[] forbiddenChars = { '@', '#', '$', '%', '*', '!', '&' };
-            if (name.Any(x => forbiddenChars.Contains(x)))
+            if (string.IsNullOrEmpty(name) || name.Any(x => forbiddenChars.Contains(x)))
             {
                 return true;
             }
