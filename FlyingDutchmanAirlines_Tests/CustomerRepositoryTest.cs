@@ -83,6 +83,6 @@ public class CustomerRepositoryTest
     [ExpectedException(typeof(CustomerNotFoundException))]
     public async Task GetCustomerByName_FailInvalidInput(string invalidInput)
     {
-            Customer result = await _repository.GetCustomerByName(invalidInput);
+            await _repository.GetCustomerByName(invalidInput);
     }
 }
