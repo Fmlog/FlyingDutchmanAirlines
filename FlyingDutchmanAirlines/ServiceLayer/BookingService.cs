@@ -1,31 +1,47 @@
-﻿using FlyingDutchmanAirlines.Models;
+﻿using FlyingDutchmanAirlines.Exceptions;
+using FlyingDutchmanAirlines.Models;
 using FlyingDutchmanAirlines.RepositoryLayer;
+using Microsoft.AspNetCore.Http;
+using static System.Net.Mime.MediaTypeNames;
+using static System.Net.WebRequestMethods;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Net.NetworkInformation;
+using System;
 
 namespace FlyingDutchmanAirlines.ServiceLayer
 {
     public class BookingService
     {
-        FlightRepository _flightRepository;
-        CustomerRepository _customerRepository;
-        public BookingService(FlightRepository flightRepository,  CustomerRepository customerRepository)
+        private readonly BookingRepository _bookingRepository;
+        private readonly CustomerRepository _customerRepository;
+
+        public BookingService(BookingRepository bookingRepository, CustomerRepository customerRepository)
         {
-            _flightRepository = flightRepository;
+            _bookingRepository = bookingRepository;
             _customerRepository = customerRepository;
         }
-        public async Task<bool> CreateBooking(int flightNumber, string customerName)
+        public async Task<(bool, Exception)> CreateBooking(string name, int flightNumber)
         {
-            if (await _flightRepository.GetFlightByID(flightNumber) == null)
+            try
             {
-                throw new Exception();
-            }
+                Customer customer;
+                try
+                {
+                    customer = await _customerRepository.GetCustomerByName(name);
+                }
+                catch (FlightNotFoundException)
+                {
+                    await _customerRepository.CreateCustomer(name);
 
-                if (await _customerRepository.GetCustomerByName(customerName) == null)
+                    return await CreateBooking(name, flightNumber);
+                }
+                await _bookingRepository.CreateBooking(customer.CustomerId, flightNumber);
+                return (true, null);
+            }
+            catch (Exception exception)
             {
-                await _customerRepository.CreateCustomer(customerName);
+                return (false, exception);
             }
-            Customer customer = await _customerRepository.GetCustomerByName(customerName);
-
-            return true;
         }
     }
 }
