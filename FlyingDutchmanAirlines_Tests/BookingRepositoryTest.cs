@@ -13,7 +13,7 @@ namespace FlyingDutchmanAirlines_Tests
         private FlyingDutchmanAirlinesContext _context;
         private BookingRepository _repository;
         [TestInitialize]
-        public async Task InitializeTest()
+        public void InitializeTest()
         {
             DbContextOptions<FlyingDutchmanAirlinesContext> contextOptions =
                 new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>()
