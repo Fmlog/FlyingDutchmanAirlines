@@ -19,7 +19,7 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
                 new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>()
                 .UseInMemoryDatabase("Flying Dutchman").Options;
 
-            _context = new FlyingDutchmanAirlinesContext_Stub(contextOptions);
+            _context = new FlyingDutchmanAirlinesContext_BookingStub(contextOptions);
             _repository = new BookingRepository(_context);
         }
 
