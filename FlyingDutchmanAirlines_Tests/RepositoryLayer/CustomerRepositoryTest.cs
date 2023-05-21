@@ -3,6 +3,7 @@ using FlyingDutchmanAirlines.Models;
 using FlyingDutchmanAirlines.RepositoryLayer;
 using FlyingDutchmanAirlines.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using FlyingDutchmanAirlines_Tests.Stubs;
 
 namespace FlyingDutchmanAirlines_Tests.RepositoryLayer;
 
@@ -19,7 +20,7 @@ public class CustomerRepositoryTest
             new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>()
             .UseInMemoryDatabase("FlyingDutchman").Options;
 
-        _context = new FlyingDutchmanAirlinesContext(dbContextOptions);
+        _context = new FlyingDutchmanAirlinesContext_CustomerStub(dbContextOptions);
 
         Customer test = new Customer("Bolin");
         _context.Customers.Add(test);
@@ -32,24 +33,26 @@ public class CustomerRepositoryTest
     [TestMethod]
     public async Task CreateCustomer_Success()
     {
-        bool result = await _repository.CreateCustomer("Femi");
-        Assert.IsTrue(result);
+        await _repository.CreateCustomer("Femi");
+        Customer customer = _context.Customers.First(c => c.Name == "Femi");
+        Assert.IsNotNull(customer);
+        Assert.AreEqual(customer.Name, "Femi");
     }
 
     [TestMethod]
+    [ExpectedException(typeof(CouldNotAddCustomerToDatabaseException))]
     public async Task CreateCustomer_FailDatabaseError()
     {
         CustomerRepository repository = new CustomerRepository(null);
         Assert.IsNotNull(repository);
-        bool result = await repository.CreateCustomer("Femi");
-        Assert.IsFalse(result);
+        await repository.CreateCustomer("Femi");
     }
 
     [TestMethod]
+    [ExpectedException(typeof(ArgumentException))]
     public async Task CreateCustomer_FailOnEmptyString()
     {
-        bool result = await _repository.CreateCustomer("");
-        Assert.IsFalse(result);
+        await _repository.CreateCustomer("");
     }
 
     [TestMethod]
@@ -60,8 +63,7 @@ public class CustomerRepositoryTest
     [DataRow('*')]
     public async Task CreateCustomer_FailOnInvalidChar(char invalidChar)
     {
-        bool result = await _repository.CreateCustomer("Hello" + invalidChar);
-        Assert.IsFalse(result);
+        await Assert.ThrowsExceptionAsync<ArgumentException> (async () =>await _repository.CreateCustomer(""));
     }
 
     [TestMethod]
