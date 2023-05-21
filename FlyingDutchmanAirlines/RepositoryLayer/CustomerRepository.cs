@@ -2,21 +2,35 @@
 using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FlyingDutchmanAirlines.RepositoryLayer
 {
     public class CustomerRepository
     {
         private readonly FlyingDutchmanAirlinesContext _context;
+
         public CustomerRepository(FlyingDutchmanAirlinesContext context)
         {
             _context = context;
         }
-        public async Task<bool> CreateCustomer(string name)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public CustomerRepository()
+        {
+            if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+            {
+                throw new Exception("This constructor is reserved for testing only");
+            }
+
+        }
+
+        public virtual async Task CreateCustomer(string name)
         {
             if (IsInvalidCustomerName(name))
             {
-                return false;
+                Console.WriteLine($"Argument Exception in CreateCustomer! name = {name}");
+                throw new ArgumentException("Invalid Name");
             }
             Customer customer = new Customer(name);
             try
@@ -29,10 +43,8 @@ namespace FlyingDutchmanAirlines.RepositoryLayer
             }
             catch
             {
-                return false;
+                throw new CouldNotAddCustomerToDatabaseException();
             }
-             
-            return true;
         }
         public async Task<Customer> GetCustomerByName(string name)
         {
