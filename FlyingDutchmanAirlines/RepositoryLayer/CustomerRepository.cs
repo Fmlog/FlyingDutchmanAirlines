@@ -25,28 +25,26 @@ namespace FlyingDutchmanAirlines.RepositoryLayer
 
         }
 
-        public virtual async Task CreateCustomer(string name)
+        public async Task CreateCustomer(string name)
         {
             if (IsInvalidCustomerName(name))
             {
                 Console.WriteLine($"Argument Exception in CreateCustomer! name = {name}");
+
                 throw new ArgumentException("Invalid Name");
             }
             Customer customer = new Customer(name);
             try
             {
-                using (_context)
-                {
-                    _context.Customers.Add(customer);
-                    await _context.SaveChangesAsync();
-                }
+                _context.Customers.Add(customer);
+                await _context.SaveChangesAsync();
             }
             catch
             {
                 throw new CouldNotAddCustomerToDatabaseException();
             }
         }
-        public async Task<Customer> GetCustomerByName(string name)
+        public virtual async Task<Customer> GetCustomerByName(string name)
         {
             if (IsInvalidCustomerName(name))
             {
