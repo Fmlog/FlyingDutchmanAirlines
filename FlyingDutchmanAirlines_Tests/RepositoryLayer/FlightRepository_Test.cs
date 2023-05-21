@@ -18,7 +18,7 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
             DbContextOptions<FlyingDutchmanAirlinesContext> options =
                 new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>().UseInMemoryDatabase("Flying Dutchman").Options;
 
-            _context = new FlyingDutchmanAirlinesContext_Stub(options);
+            _context = new FlyingDutchmanAirlinesContext_AirportStub(options);
             _context.Flights.Add(new Flight
             {
                 FlightNumber = 1,
@@ -44,9 +44,10 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
         }
 
         [TestMethod]
-        public void GetFlightByID_Fail_InvalidDestinationAirport()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task GetFlightByID_Fail_InvalidDestinationAirport()
         {
-            Assert.ThrowsException<ArgumentException>(async () => await _repository.GetFlightByID(1, 1, -1));
+            await _repository.GetFlightByID(1, 1, -1);
         }
 
         [TestMethod]
