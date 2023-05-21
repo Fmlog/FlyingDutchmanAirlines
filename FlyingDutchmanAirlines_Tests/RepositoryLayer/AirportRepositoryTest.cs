@@ -21,7 +21,7 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
                 new DbContextOptionsBuilder<FlyingDutchmanAirlinesContext>()
                 .UseInMemoryDatabase("Flying Dutchman").Options;
 
-            _context = new FlyingDutchmanAirlinesContext_Stub(options);
+            _context = new FlyingDutchmanAirlinesContext_AirportStub(options);
 
             SortedList<string, Airport> airports =
                 new SortedList<string, Airport>
