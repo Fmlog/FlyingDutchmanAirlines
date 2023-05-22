@@ -22,8 +22,6 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
             _context.Flights.Add(new Flight
             {
                 FlightNumber = 1,
-                Origin = 1,
-                Destination = 1
             });
             _context.SaveChanges();
             _repository = new FlightRepository(_context);
@@ -32,36 +30,22 @@ namespace FlyingDutchmanAirlines_Tests.RepositoryLayer
         [TestMethod]
         public async Task GetFlightByID_Success()
         {
-            Flight flight = await _repository.GetFlightByID(1, 1, 1);
+            Flight flight = await _repository.GetFlightByID(1);
             Assert.IsNotNull(flight);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task GetFlightByID_Fail_InvalidOriginAirport()
-        {
-            await _repository.GetFlightByID(1, -1, 1);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task GetFlightByID_Fail_InvalidDestinationAirport()
-        {
-            await _repository.GetFlightByID(1, 1, -1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(FlightNotFoundException))]
         public async Task GetFlightByID_Fail_InvalidFlightNumber()
         {
-            await _repository.GetFlightByID(-1, 0, 0);
+            await _repository.GetFlightByID(-1);
         }
 
         [TestMethod]
         [ExpectedException(typeof(FlightNotFoundException))]
         public async Task GetFlightByID_Fail_DatabaseException()
         {
-            await _repository.GetFlightByID(2, 2, 2);
+            await _repository.GetFlightByID(2);
         }
     }
 }
