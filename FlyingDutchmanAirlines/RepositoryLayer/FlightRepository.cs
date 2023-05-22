@@ -2,7 +2,8 @@
 using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.Models;
 using Microsoft.EntityFrameworkCore;
-
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FlyingDutchmanAirlines.RepositoryLayer
 {
@@ -10,19 +11,29 @@ namespace FlyingDutchmanAirlines.RepositoryLayer
     {
         private readonly FlyingDutchmanAirlinesContext _context;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public FlightRepository()
+        {
+            if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+            {
+                throw new Exception("This constructor reserved for testing only!");
+            }
+        }
         public FlightRepository(FlyingDutchmanAirlinesContext context)
         {
             _context = context;
         }
-
-        public async Task<Flight> GetFlightByID(int flightNumber, int originAirportId, int destinationAirportId)
+        public virtual Queue<Flight> GetFlights()
         {
-            if ( !originAirportId.IsPositive() || !destinationAirportId.IsPositive())
+            Queue<Flight> flights = new Queue<Flight>();
+            foreach (Flight flight in _context.Flights)
             {
-                Console.WriteLine($"Argument Exception in GetFlightByID! FlightNumber = {flightNumber}, " +
-                    $"OriginAirportId = {originAirportId}, destinationAirportId = {destinationAirportId},");
-                throw new ArgumentException();
+                flights.Enqueue(flight);
             }
+            return flights;
+        }
+        public virtual async Task<Flight> GetFlightByID(int flightNumber)
+        {
             if (!flightNumber.IsPositive())
             {
                 Console.WriteLine($"Argument Exception in GetFlightByID! FlightNumber = {flightNumber}");
