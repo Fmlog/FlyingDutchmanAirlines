@@ -2,18 +2,29 @@
 using FlyingDutchmanAirlines.Exceptions;
 using FlyingDutchmanAirlines.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FlyingDutchmanAirlines.RepositoryLayer
 {
     public class AirportRepository
     {
         public readonly FlyingDutchmanAirlinesContext _context;
+
         public AirportRepository(FlyingDutchmanAirlinesContext context)
         {
             _context = context;
         }
 
-        public async Task<Airport> GetAirportByID(int airportID)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public AirportRepository()
+        {
+            if (Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+            {
+                throw new Exception("This constructor is reserved for tests only!");
+            }
+        }
+        public virtual async Task<Airport> GetAirportByID(int airportID)
         {
             if (!airportID.IsPositive())
             {
