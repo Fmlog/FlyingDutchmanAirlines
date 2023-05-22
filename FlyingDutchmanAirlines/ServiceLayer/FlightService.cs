@@ -2,6 +2,8 @@
 using FlyingDutchmanAirlines.Models;
 using FlyingDutchmanAirlines.RepositoryLayer;
 using FlyingDutchmanAirlines.Views;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace FlyingDutchmanAirlines.ServiceLayer
 {
@@ -10,13 +12,21 @@ namespace FlyingDutchmanAirlines.ServiceLayer
         private readonly FlightRepository _flightRepository;
         private readonly AirportRepository _airportRepository;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public FlightService()
+        {
+            if(Assembly.GetExecutingAssembly().FullName == Assembly.GetCallingAssembly().FullName)
+            {
+                throw new Exception("This constructor is reserved for tesing only!");
+            }
+        }
         public FlightService(FlightRepository flightRepository, AirportRepository airportRepository)
         {
             _flightRepository = flightRepository;
             _airportRepository = airportRepository;
         }
 
-        public async IAsyncEnumerable<FlightView> GetFlights()
+        public virtual async IAsyncEnumerable<FlightView> GetFlights()
         {
             Queue<Flight> flights = _flightRepository.GetFlights();
             foreach (Flight flight in flights)
